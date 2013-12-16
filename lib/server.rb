@@ -4,8 +4,19 @@ require 'sinatra'
 require 'erb'
 require 'yaml'
 
-class CommonplaceServer < Sinatra::Base	
-	configure do 
+
+class CommonplaceServer < Sinatra::Base	       
+  
+  configure do 
+    use Rack::Session::Cookie, {
+      :http_only => true,
+      :secret => ENV['SESSION_SECRET'] || SecureRandom.hex
+    }  
+    set :github_options, {
+        :scopes    => "user",
+        :secret    => ENV['GITHUB_CLIENT_SECRET'],
+        :client_id => ENV['GITHUB_CLIENT_ID'],
+    }
 		config = YAML::load(File.open("config/commonplace.yml"))
 		set :sitename, config['sitename']
 		set :dir, config['wikidir']
@@ -13,9 +24,11 @@ class CommonplaceServer < Sinatra::Base
    		set :public_folder, "public"
    		set :views, "views"
 	end
+  
+  register Sinatra::Auth::Github
 
 	before do
-		@wiki = Commonplace.new(settings.dir)
+    @wiki = Commonplace.new(settings.dir)
 	end
 
 	# if we've locked editing access on the config file, 
@@ -27,11 +40,18 @@ class CommonplaceServer < Sinatra::Base
 	
 	# show the homepage
 	get '/' do
-		show('home')
+    authenticate!
+    show('home')
 	end
+  
+  #get '/auth/github/callback' do
+  #  show('home')
+  #end
+      
 	
 	# show the known page list
 	get '/list' do
+    authenticate!
 		@name = "Known pages"
 		@pages = @wiki.list
 		erb :list
@@ -39,17 +59,20 @@ class CommonplaceServer < Sinatra::Base
 
 	# show everything else
 	get '/:page' do
+    authenticate!
 		show(params[:page])
 	end
 	
 	# show everything else
 	get '/:page/raw' do
+    authenticate!
 		@page = @wiki.page(params[:page])
 		@page.raw.to_s
 	end
 	
 	# edit a given page
 	get	'/p/:page/edit' do
+    authenticate!
 		@page = @wiki.page(params[:page])
 		
 		if @page
@@ -65,12 +88,14 @@ class CommonplaceServer < Sinatra::Base
 	
 	# accept updates to a page
 	post '/p/:page/edit' do
+    authenticate!
 		page = @wiki.save(params[:page], params[:content])
 		redirect "/#{page.permalink}"
 	end
 
 	# create a new page
 	get '/p/new/?' do
+    authenticate!
 		@name = "New page"
 		@editing = true
 		erb :new
@@ -78,14 +103,17 @@ class CommonplaceServer < Sinatra::Base
 	
 	# create a new page
 	get '/p/new/:pagename' do
+    authenticate!
 		@newpagename = @wiki.get_pagename(params[:pagename])
 		@name = "Creating #{@newpagename}"
 		@editing = true
 		erb :new
 	end
+  
 	
 	# save the new page
 	post '/p/save' do
+    authenticate!
 		if params[:filename] && params[:filename] != ""
 			filename = params[:filename].gsub(" ", "_").downcase
 			page = @wiki.save(filename, params[:content])

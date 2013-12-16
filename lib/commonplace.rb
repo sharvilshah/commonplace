@@ -1,7 +1,9 @@
 require 'rubygems'
 require 'redcarpet'
+require 'pygments'
 
 class Commonplace
+  
 	attr_accessor :dir
 	
 	# initialize our wiki class
@@ -82,6 +84,17 @@ class Commonplace
 	end
 end
 
+class SyntaxRenderer < Redcarpet::Render::HTML
+  def block_code(code, language)
+    if language && !language.empty?
+      Pygments.highlight(code, lexer: language)
+    else
+      "<pre><code>#{code}</code></pre>"
+    end
+  end
+end
+
+
 class Page
 	attr_accessor :name, :permalink
 	
@@ -91,12 +104,39 @@ class Page
 		@name = filename.gsub('_', ' ').capitalize
 		@wiki = wiki
 	end
+  
+  def optionize(options)
+    options.inject({}) { |memo, option| memo[option] = true; memo }
+  end
 	
 	# return html for markdown formatted page content
 	def content
-		return Redcarpet.new(parse_links(@content)).to_html
+		#return Redcarpet.new(parse_links(@content)).to_html
+    #markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+    #markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, :autolink => true, :space_after_headers => true)
+    
+    
+    renderer = SyntaxRenderer.new(optionize [
+        :with_toc_data,
+        #:hard_wrap,
+        :html
+      ])
+      markdown = Redcarpet::Markdown.new(renderer, optionize([
+        :fenced_code_blocks,
+        :no_intra_emphasis,
+        :tables,
+        :superscript,
+        :autolink,
+        :strikethrough,
+        :space_after_headers,
+        :with_toc_data,
+        #:no_styles,
+        :lax_spacing
+      ]))
+    return markdown.render(parse_links(@content))
 	end
 	
+  
 	# return raw page content
 	def raw
 		return @content
