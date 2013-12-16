@@ -92,6 +92,21 @@ class SyntaxRenderer < Redcarpet::Render::HTML
       "<pre><code>#{code}</code></pre>"
     end
   end
+  
+  def header(title, level)
+    @headers ||= []
+    permalink = title.gsub(/\W+/, '-')
+
+    if @headers.include? permalink
+      permalink += '_1'
+      permalink = permalink.succ while @headers.include? permalink
+    end
+    @headers << permalink
+    %(
+      <h#{level} id=\"#{permalink}\"><a name="#{permalink}" class="anchor" href="##{permalink}"></a>#{title}</h#{level}>
+    )
+  end
+  
 end
 
 
@@ -110,18 +125,15 @@ class Page
   end
 	
 	# return html for markdown formatted page content
-	def content
-		#return Redcarpet.new(parse_links(@content)).to_html
-    #markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
-    #markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, :autolink => true, :space_after_headers => true)
-    
-    
+	def content    
     renderer = SyntaxRenderer.new(optionize [
         :with_toc_data,
         #:hard_wrap,
-        :html
+        :xhtml
       ])
-      markdown = Redcarpet::Markdown.new(renderer, optionize([
+    #html_toc = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC)
+    
+    markdown = Redcarpet::Markdown.new(renderer, optionize([
         :fenced_code_blocks,
         :no_intra_emphasis,
         :tables,
@@ -130,10 +142,17 @@ class Page
         :strikethrough,
         :space_after_headers,
         :with_toc_data,
+        :quote,
         #:no_styles,
         :lax_spacing
       ]))
-    return markdown.render(parse_links(@content))
+    
+    parsed_content = parse_links(@content)
+
+    #toc = html_toc.render(parsed_content)
+    marked = markdown.render(parsed_content)  
+    #return toc + marked
+    return marked
 	end
 	
   
@@ -144,15 +163,17 @@ class Page
 	
 	# looks for links in a page's content and changes them into anchor tags
 	def parse_links(content)
+    #puts content
 		return content.gsub(/\[\[(.+?)\]\]/m) do
 			name = $1
 			permalink = name.downcase.gsub(' ', '_')
-			
+      
 			if @wiki.page(permalink)
 				"<a class=\"internal\" href=\"/#{permalink}\">" + name + '</a>'
 			else 
 				"<a class=\"internal new\" href=\"/#{permalink}\">" + name + '</a>'
 			end
 		end.to_s
-	end	
+	end
+  
 end
