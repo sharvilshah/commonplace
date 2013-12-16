@@ -3,20 +3,11 @@
 	<title><%= @name %> | <%= settings.sitename %></title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;">
-	<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="/css/screen.css">	
 </head>
 <body>
 	<section id="content">
-		<article id="page">
-			<h1 class="title"><%= '<a href="/">Home</a> &gt; ' if @name != "Home" %><%= @name %></h1>
-			<% if @alert %>
-				<div class="alert-message error"><%= @alert %></div>
-			<% end %>
-					
-			<%= yield %>
-		</article>
-				
 		<% if !@error %>
 			<nav class="tools">
 				<a href="/" class="btn small <%= "disabled" if @name == "Home" %>">&lt; Home</a>
@@ -29,6 +20,16 @@
 				<% end %>
 			</nav>
 		<% end %>
+		
+		<article id="page">
+			<h1 class="title"><%= '<a href="/">Home</a> &gt; ' if @name != "Home" %><%= @name %></h1>
+			<% if @alert %>
+				<div class="alert-message error"><%= @alert %></div>
+			<% end %>
+					
+			<%= yield %>
+		</article>
+				
 	</section>
 		
 	<footer>

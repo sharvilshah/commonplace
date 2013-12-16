@@ -24,6 +24,7 @@ class Commonplace
 		f = Dir.entries(dir)
 		f.delete(".")
 		f.delete("..")
+    f.delete("DS_Store")
 
 		return f
 	end
@@ -128,10 +129,10 @@ class Page
 	def content    
     renderer = SyntaxRenderer.new(optionize [
         :with_toc_data,
-        #:hard_wrap,
-        :xhtml
+        #{:hard_wrap,
+        :xhtml,
+        :prettify
       ])
-    #html_toc = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC)
     
     markdown = Redcarpet::Markdown.new(renderer, optionize([
         :fenced_code_blocks,
@@ -143,16 +144,10 @@ class Page
         :space_after_headers,
         :with_toc_data,
         :quote,
-        #:no_styles,
         :lax_spacing
       ]))
     
-    parsed_content = parse_links(@content)
-
-    #toc = html_toc.render(parsed_content)
-    marked = markdown.render(parsed_content)  
-    #return toc + marked
-    return marked
+    return markdown.render(parse_links(@content))  
 	end
 	
   
@@ -163,7 +158,6 @@ class Page
 	
 	# looks for links in a page's content and changes them into anchor tags
 	def parse_links(content)
-    #puts content
 		return content.gsub(/\[\[(.+?)\]\]/m) do
 			name = $1
 			permalink = name.downcase.gsub(' ', '_')

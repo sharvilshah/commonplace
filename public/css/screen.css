@@ -2005,9 +2005,9 @@ footer a {
   line-height: 1.7em;
 }
 #page code {
-  background: #eee;
+  /* background: #eee; */
   font-family: Monaco, Andale Mono, Courier New, monospace;
-  font-size: 0.75em;
+  font-size: 0.85em;
 }
 #page a {
   color: #00998f;
