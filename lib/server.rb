@@ -8,27 +8,29 @@ require 'yaml'
 class CommonplaceServer < Sinatra::Base	       
   
   configure do 
-    use Rack::Session::Cookie, {
-      :http_only => true,
-      :secret => ENV['SESSION_SECRET'] || SecureRandom.hex
-    }  
-    set :github_options, {
-        :scopes    => "user",
-        :secret    => ENV['GITHUB_CLIENT_SECRET'],
-        :client_id => ENV['GITHUB_CLIENT_ID'],
-    }
+    	use Rack::Session::Cookie, {
+      		:http_only => true,
+      		:secret => ENV['SESSION_SECRET'] || SecureRandom.hex
+    	}  
+    	
+    	set :github_options, {
+        	:scopes    => "user",
+        	:secret    => ENV['GITHUB_CLIENT_SECRET'],
+        	:client_id => ENV['GITHUB_CLIENT_ID'],
+    	}
+		
 		config = YAML::load(File.open("config/commonplace.yml"))
 		set :sitename, config['sitename']
 		set :dir, config['wikidir']
 		set :readonly, config['readonly']
-   	set :public_folder, "public"
-   	set :views, "views"
+   		set :public_folder, "public"
+   		set :views, "views"
 	end
   
-  register Sinatra::Auth::Github
+  	register Sinatra::Auth::Github
 
 	before do
-    @wiki = Commonplace.new(settings.dir)
+    	@wiki = Commonplace.new(settings.dir)
 	end
 
 	# if we've locked editing access on the config file, 
@@ -40,18 +42,13 @@ class CommonplaceServer < Sinatra::Base
 	
 	# show the homepage
 	get '/' do
-    authenticate!
-    show('home')
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
+    	show('home')
 	end
-  
-  #get '/auth/github/callback' do
-  #  show('home')
-  #end
-      
 	
 	# show the known page list
 	get '/list' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		@name = "Known pages"
 		@pages = @wiki.list
 		erb :list
@@ -59,20 +56,20 @@ class CommonplaceServer < Sinatra::Base
 
 	# show everything else
 	get '/:page' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		show(params[:page])
 	end
 	
 	# show everything else
 	get '/:page/raw' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		@page = @wiki.page(params[:page])
 		@page.raw.to_s
 	end
 	
 	# edit a given page
 	get	'/p/:page/edit' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		@page = @wiki.page(params[:page])
 		
 		if @page
@@ -88,14 +85,14 @@ class CommonplaceServer < Sinatra::Base
 	
 	# accept updates to a page
 	post '/p/:page/edit' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		page = @wiki.save(params[:page], params[:content])
 		redirect "/#{page.permalink}"
 	end
 
 	# create a new page
 	get '/p/new/?' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		@name = "New page"
 		@editing = true
 		erb :new
@@ -103,7 +100,7 @@ class CommonplaceServer < Sinatra::Base
 	
 	# create a new page
 	get '/p/new/:pagename' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		@newpagename = @wiki.get_pagename(params[:pagename])
 		@name = "Creating #{@newpagename}"
 		@editing = true
@@ -113,7 +110,7 @@ class CommonplaceServer < Sinatra::Base
 	
 	# save the new page
 	post '/p/save' do
-    authenticate!
+    	github_organization_authenticate!(ENV['GITHUB_ORG_ID'])
 		if params[:filename] && params[:filename] != ""
 			filename = params[:filename].gsub(" ", "_").downcase
 			page = @wiki.save(filename, params[:content])
@@ -138,6 +135,7 @@ class CommonplaceServer < Sinatra::Base
 				# may success come to those who enter here.
 				@name = @page.name
 				@content = @page.content
+				@tags = @page.tags
 				erb :show
 			else
 				status 404

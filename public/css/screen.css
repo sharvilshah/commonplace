@@ -1973,7 +1973,7 @@ footer a {
 }
 #content {
   margin: 4em auto;
-  max-width: 43em;
+  max-width: 65em;
 }
 #page {
   background: #fff;
@@ -1990,7 +1990,7 @@ footer a {
 }
 #page h1.title {
   margin: -1em -1em 1em -1em;
-  padding: 0.7em 1em;
+  padding: 0.7em 1em 0.5em;
   background: #fffdef;
   font-size: 1.8em;
   border-bottom: 1px solid #eee;
@@ -2060,6 +2060,16 @@ footer a {
 }
 #page blockquote {
   color: #999;
+}
+#page h1.title div span.tag a {
+	position: relative;
+	padding: 2px 5px;
+	font-size: 10px;
+	font-weight: bold;
+	color: #fff;
+	text-transform: uppercase;
+	background-color: #4183C4;
+	border-radius: 3px;
 }
 .tools {
   margin-bottom: 1em;

@@ -49,3 +49,89 @@ This is how you include amazing imagery from the wonderful world of the internet
 I hope this example file finds you well, and that you reach its very end happy and amused. If not, at least you're patient, because reading the kind of crap I write is, well, a spectacular waste of time. Maybe you'd like to [follow me on the worlds of twitter](http://twitter.com/f) to read more?
 
 Your humble programmer slash designer slash writer, *Fred*.
+
+```python
+import math, sys
+
+def sqrt(number, accuracy=5):
+	"""
+	implemented sqrt using newton's method
+	Let's say we want to find square-root of n
+	So x^2 = n, hence we find roots of that using newton's method
+	We have:
+	f(x) = x^2 - n 
+	f'(x) = 2x
+ 	x1 = x0 - f(x0)/f'(x0)
+ 	x2 = x1 - f(x1)/f'(x1)
+ 	.
+ 	.
+ 	we stop after reaching the desired tolerance.
+ 	The default tolerance is 10^(-5) digits
+	"""
+
+	try:
+		number = float(number)
+	except ValueError:
+		sys.exit('Input is not a number')
+
+	# I can raise a value error here,
+	# but the convention seems to be to return NaN (not a number)
+	# NaN's are part of IEEE 754 floating point standard
+	# and are standard as of python 2.6
+	if number < 0:
+		return float('nan')
+	
+	# tolerance : 10 ^ (-accuracy)
+	tol = 10 ** (-1 * accuracy) 
+
+	# x0: initial guess, average
+	x0 = (number + 1)/2.0 
+	result = x0
+
+	while math.fabs((result ** 2) - number) >= tol:
+		result = result - ((result ** 2 - number) / (2 * result))
+
+	return result
+
+if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		sys.exit('Usage: %s <number>' % sys.argv[0])
+	print sqrt(sys.argv[1])
+```
+
+```java
+import static java.lang.Math.abs;
+public class Sqrt {
+
+	public static double sqrt(double number, int accuracy) {
+		if (number < 0)
+			return Double.NaN;
+		double tol = Math.pow(10, -1*accuracy);
+		double x0 = number < 1 ? (0+1)/2.0 : (1+number)/2.0;
+		double result = x0;
+		int count = 0;
+		while (Math.abs(result*result - number) > tol) {
+			result = result - ((result*result - number)/(2*result));
+			count += 1;
+		}
+		System.out.println("count = "+count);
+		return result;
+	}
+
+	public static double division(double N, double D) {
+		if (D < 0)
+			return Double.NaN;
+		double tol = 0.001;
+		double x0 = 1.0;
+		double reciprocal = x0;
+		while(Math.abs((1 - D*reciprocal)/reciprocal) > tol) {
+			reciprocal = reciprocal*(2 - D*reciprocal);
+		}
+		return reciprocal;
+	}
+
+	public static void main(String[] args) {
+		System.out.println(division(3.0,7.0));
+	}
+}
+```

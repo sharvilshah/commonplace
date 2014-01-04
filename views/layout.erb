@@ -7,6 +7,7 @@
 	<link rel="stylesheet" href="/css/screen.css">	
 </head>
 <body>
+
 	<section id="content">
 		<% if !@error %>
 			<nav class="tools">
@@ -15,19 +16,34 @@
 				<% if @page && !@editing && !settings.readonly %>
 					<a href="/p/new" class="btn small">New page</a>
 					<a href="/p/<%= @page.permalink %>/edit" class="btn small primary">Edit this</a>
-				<% elsif @newpage %>
+				<% elsif @newpage && !settings.readonly %>
 					<a href="/p/new/<%= @newpage %>" class="btn small primary">Create <%= @wiki.file_to_pagename(@newpage) %></a>
 				<% end %>
 			</nav>
-		<% end %>
-		
+			
 		<article id="page">
-			<h1 class="title"><%= '<a href="/">Home</a> &gt; ' if @name != "Home" %><%= @name %></h1>
+			<h1 class="title"><%= '<a href="/">Home</a> &gt; ' if @name != "Home" %><%= @name %>
+				<div>
+					<% if @tags %>
+						<% @tags.each do |t| %>
+							<span class="tag">
+								<a href="/tag/<%= t %>"><%= t%></a>
+							</span>
+						<% end %>
+					<% end %>
+				</div>
+			</h1>
+			
+			
+			<% end %>
+			
 			<% if @alert %>
 				<div class="alert-message error"><%= @alert %></div>
 			<% end %>
 					
 			<%= yield %>
+			
+						
 		</article>
 				
 	</section>

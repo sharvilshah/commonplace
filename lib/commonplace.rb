@@ -24,7 +24,7 @@ class Commonplace
 		f = Dir.entries(dir)
 		f.delete(".")
 		f.delete("..")
-    f.delete("DS_Store")
+    f.delete(".DS_Store")
 
 		return f
 	end
@@ -119,36 +119,41 @@ class Page
 		@permalink = filename
 		@name = filename.gsub('_', ' ').capitalize
 		@wiki = wiki
+		@tags = tags #["hello", "world"]
 	end
   
-  def optionize(options)
-    options.inject({}) { |memo, option| memo[option] = true; memo }
-  end
+  	def optionize(options)
+    	options.inject({}) { |memo, option| memo[option] = true; memo }
+  	end
 	
 	# return html for markdown formatted page content
 	def content    
-    renderer = SyntaxRenderer.new(optionize [
-        :with_toc_data,
-        #{:hard_wrap,
-        :xhtml,
-        :prettify
-      ])
+    	renderer = SyntaxRenderer.new(optionize [
+        	:with_toc_data,
+        	#{:hard_wrap,
+        	:xhtml,
+        	:prettify
+      	])
     
-    markdown = Redcarpet::Markdown.new(renderer, optionize([
-        :fenced_code_blocks,
-        :no_intra_emphasis,
-        :tables,
-        :superscript,
-        :autolink,
-        :strikethrough,
-        :space_after_headers,
-        :with_toc_data,
-        :quote,
-        :lax_spacing
-      ]))
+    	markdown = Redcarpet::Markdown.new(renderer, optionize([
+        	:fenced_code_blocks,
+        	:no_intra_emphasis,
+        	:tables,
+        	:superscript,
+        	:autolink,
+        	:strikethrough,
+        	:space_after_headers,
+        	:with_toc_data,
+        	:quote,
+        	:lax_spacing
+      	]))
     
-    return markdown.render(parse_links(@content))  
+    	return markdown.render(parse_links(@content))  
 	end
+
+	def tags
+	  return ["hello-there", "world tour"]
+  end
 	
   
 	# return raw page content
@@ -169,5 +174,4 @@ class Page
 			end
 		end.to_s
 	end
-  
 end

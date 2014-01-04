@@ -9,3 +9,8 @@ Commonplace is not meant to be a markdown editor, even though it includes basic 
 ### Now that you're running this,
 
 I hope Commonplace is as useful to you as it is to me. Let me know ([perhaps on twitter](http://twitter.com/f)) if you need help or have suggestions. If you have code chops, feel free to contribute by sending in your pull requests [on Github](https://github.com/fredoliveira/commonplace).
+
+### Todo's
+
+- [ ] Unchecked
+- [x] Checked
